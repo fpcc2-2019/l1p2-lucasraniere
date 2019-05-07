@@ -95,3 +95,15 @@ buscas %>%
     
 ```
 
+```{r}
+######### testes #########
+
+buscas %>%
+    mutate(day = round_date(buscas$session_start_date, "day")) %>%
+    group_by(day) %>%
+    select(day) %>%
+    count %>%
+    unique()
+```
+
+
