@@ -26,11 +26,46 @@ buscas %>%
     geom_histogram(binwidth = 5) 
 ```
 
+```{r}
+# processamento do dataset
+# criação da variável dia e exclusão dos outliers
+
+buscas <- buscas %>%
+            mutate(day = round_date(buscas$session_start_date, "day")) %>%
+            filter(first_click < 500) %>%
+            glimpse()
+```
+
+
 ## 1.What is our daily overall clickthrough rate? How does it vary between the groups?
 
 ```{r echo=FALSE, warning=FALSE}
-buscas
+# clickthrough rate: the proportion of search sessions where the user clicked on one of the results displayed
+
+tudo = buscas %>%
+        group_by(session_id) %>%
+        select(session_id) %>%
+        unique() %>%
+        nrow()
+
+click_m = group_by(session_id) %>%
+            filter(num_clicks > 0) %>% 
+            select(session_id) %>%
+            unique() %>%
+            nrow()
+
+tudo
+click_m
+
+#buscas %>%
+    
 ```
+
+```{r}
+buscas %>%
+    filter(num_clicks == 0)
+```
+
 
 ## 2.Which results do people tend to try first? How does it change day-to-day?
 
@@ -98,12 +133,7 @@ buscas %>%
 ```{r}
 ######### testes #########
 
-buscas %>%
-    mutate(day = round_date(buscas$session_start_date, "day")) %>%
-    group_by(day) %>%
-    select(day) %>%
-    count %>%
-    unique()
+
 ```
 
 
