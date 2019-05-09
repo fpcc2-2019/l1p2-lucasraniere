@@ -5,9 +5,9 @@ output:
     df_print: paged
 ---
 
-O objeto principal da análise são as buscas e a navegação depois da busca. Criamos esses dados a partir dos dados originais da wikimedia em `/data/search_data.csv`. 
+## Lucas Raniére Juvino Santos
 
-Aqui, exploramos esses dados. 
+O objeto principal da análise são as buscas e a navegação depois da busca. Criamos esses dados a partir dos dados originais da wikimedia em `/data/search_data.csv`. 
 
 ```{r setup, echo=FALSE, warning=FALSE}
 library(tidyverse)
@@ -16,124 +16,111 @@ library(lubridate)
 theme_set(theme_bw())
 ```
 
-```{r ETL, echo=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE}
 buscas = read_csv(here::here("data/search_data.csv"))
 ```
 
 ```{r echo=FALSE, warning=FALSE}
-buscas %>% 
-    ggplot(aes(x = results)) + 
-    geom_histogram(binwidth = 5) 
-```
-
-```{r}
 # processamento do dataset
-# criação da variável dia e exclusão dos outliers
+# criação da variável dia, trocando os valores de first_click NA por 0, e exclusão dos outliers
 
 buscas <- buscas %>%
             mutate(day = round_date(buscas$session_start_date, "day")) %>%
-            filter(first_click < 500) %>%
-            glimpse()
-```
+            filter(is.na(first_click) | first_click < 500)         
 
+buscas_a <- buscas %>%
+              filter(group == 'a')
+
+buscas_b <- buscas %>%
+              filter(group == 'b')
+```
 
 ## 1.What is our daily overall clickthrough rate? How does it vary between the groups?
 
 ```{r echo=FALSE, warning=FALSE}
 # clickthrough rate: the proportion of search sessions where the user clicked on one of the results displayed
+buscas_a %>%
+  group_by(session_id, group, day) %>%
+  summarise(c_clicks = any(num_clicks > 0)) %>%
+  ungroup() %>%
+  group_by(day) %>%
+  summarise(clickt_rate = sum(c_clicks) / n()) %>%
+  ggplot(aes(x = day, y = clickt_rate)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Group A") +
+  labs(x = "Day",
+       y = "Clickthrough rate")
 
-tudo = buscas %>%
-        group_by(session_id) %>%
-        select(session_id) %>%
-        unique() %>%
-        nrow()
+buscas_b %>%
+  group_by(session_id, group, day) %>%
+  summarise(c_clicks = any(num_clicks > 0)) %>%
+  ungroup() %>%
+  group_by(day) %>%
+  summarise(clickt_rate = sum(c_clicks) / n()) %>%
+  ggplot(aes(x = day, y = clickt_rate)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Group B") +
+  labs(x = "Day",
+       y = "Clickthrough rate")
 
-click_m = group_by(session_id) %>%
-            filter(num_clicks > 0) %>% 
-            select(session_id) %>%
-            unique() %>%
-            nrow()
 
-tudo
-click_m
-
-#buscas %>%
-    
-```
-
-```{r}
-buscas %>%
-    filter(num_clicks == 0)
 ```
 
 
 ## 2.Which results do people tend to try first? How does it change day-to-day?
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 # first_click
 
-buscas %>%
-    filter(!is.na(first_click)) %>%
-    ggplot(aes(x = session_id, y = first_click)) +
-    geom_point()
+buscas_a %>%
+  filter(!is.na(first_click)) %>%
+  group_by(day) %>%
+  ggplot(aes(x = day, y = first_click)) +
+  geom_point() +
+  ggtitle("Group A") +
+  labs(x = "Day",
+       y = "First click")
+  
+buscas_b %>%
+  filter(!is.na(first_click)) %>%
+  group_by(day) %>%
+  ggplot(aes(x = day, y = first_click)) +
+  geom_point() +
+  ggtitle("Group B") +
+  labs(x = "Day",
+       y = "First click")
 ```
-
-```{r}
-buscas %>%
-    filter(!is.na(first_click)) %>%
-    select(session_id, search_index, first_click) %>%
-    arrange(desc(first_click))
-```
-
-Aqui podemos ver alguns valores atípicos, onde os resultados acessados estão em uma posição muito alta. Onde até o resultado de 4103 foi clicado.
-
-```{r}
-buscas %>%
-    filter(!is.na(first_click), first_click > 299) %>%
-    count()
-```
-
-```{r}
-buscas %>%
-    filter(!is.na(first_click), first_click < 300) %>%
-    count()
-```
-
-Temos 33 valores com cliques acima da posição 300, e 33161 com cliques abaixo da posição de 300. Para uma melhor visualização iremos utilizar os valores com posição abaixo de 300.
-
-```{r}
-buscas %>%
-    filter(!is.na(first_click), first_click < 300) %>%
-    ggplot(aes(x = session_id, y = first_click)) +
-    geom_point()
-```
-
 
 ## 3.What is our daily overall zero results rate? How does it vary between the groups?
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 buscas %>%
-    filter(results == 0)
+  filter(!is.na(results)) %>%
+  mutate(t_results = results > 0) %>%
+  group_by(day, group) %>%
+  summarise(rate = 1 - (sum(t_results) / n())) %>%
+  group_by(group) %>%
+  ggplot(aes(x = day, y = rate, color = group)) +
+  geom_point() +
+  geom_line() +
+  #facet_wrap(~group) +
+  labs(x = "Day",
+       y = "Zero results rate")
 ```
 
 
 ## 4.Let session length be approximately the time between the first event and the last event in a session. Choose a variable from the dataset and describe its relationship to session length. 
 
-relacionar o tempo da sessão com número de clicks
-
-lembrar de ordenar
-```{r}
+```{r echo=FALSE, warning=FALSE}
 buscas %>%
-    filter(!is.na(session_length), !is.na(session_id), !is.na(num_clicks)) %>%
+    filter(session_length < 4000) %>%
     ggplot(aes(x = num_clicks, y = session_length/60)) +
-    geom_point()
-    
+    geom_point(alpha = .5)
 ```
 
-```{r}
-######### testes #########
 
 
-```
 
 
