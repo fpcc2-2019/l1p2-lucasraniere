@@ -1,0 +1,94 @@
+---
+title: "P-valores x ICs"
+author: "Lucas Raniere Juvino Santos"
+output:
+  html_document:
+    theme: readable
+    df_print: paged
+    toc: yes
+  html_notebook:
+    fig_width: 7
+    theme: readable
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+library(lubridate)
+theme_set(theme_bw())
+
+options(readr.num_columns = 0)
+```
+
+
+## O Problema
+
+Considerando que os dados da wikimedia que usamos no Laboratório 2, faça uma inferência sobre como é, na população de todas as sessões do site:
+
+    1. A diferença entre o clickthrough rate dos grupos A e B; e
+    2. A diferença na proporção buscas com zero resultados nos grupos A e B
+    
+## O que precisa ser feito
+
+Você deve produzir, para os pontos 1 e 2 acima:
+
+    a. Um parágrafo de resposta contendo os números necessários e explicando a sua resposta usando testes de hipótese via pemutação. O parágrafo deve ser estilo o que você colocaria em um artigo - claro, formal e contendo as estatísticas e termos necessários (p-valor, se foram usadas permutações, qual era a estatística do teste, etc.).
+    b. Um parágrafo de resposta contendo os números necessários e explicando a sua resposta usando ICs. O parágrafo deve ser estilo o que você colocaria em um artigo - claro, formal e contendo as estatísticas e termos necessários (nível de confiança, limites do IC, etc.).
+    c. Um parágrafo que comenta se/como os pontos a e b acima concordam, e que compara os dois parágrafos em termos de informação e utilidade para alguém tomando decisões na wikimedia.
+
+
+## Os dados
+
+```{r echo=FALSE}
+buscas = read_csv(here::here("data/search_data.csv"))
+
+glimpse(buscas)
+```
+
+## A diferença entre o clickthrough rate dos grupos A e B:
+
+Calculando a diferença do clickthrough rate de cada grupo (função $\theta$):
+
+```{r}
+
+theta_ct <- function(df) {
+    ct_g = df %>%
+        group_by(session_id, group) %>%
+        summarise(c_clicks = any(num_clicks > 0)) %>%
+        ungroup() %>%
+        group_by(group) %>%
+        summarise(clickt_rate = sum(c_clicks) / n())
+    
+    a = drop(
+        ct_g %>%
+            filter(group == 'a') %>%
+            select(clickt_rate)
+    )
+    
+    b = drop(
+       ct_g %>%
+            filter(group == 'b') %>%
+            select(clickt_rate) 
+    )
+    
+    return(a-b)
+
+}
+```
+
+```{r}
+theta_ct(buscas)
+```
+
+Calculando a diferença da proporção de buscas com zeros resultados de cada grupo ($\theta$):
+
+```{r}
+buscas %>%
+  filter(!is.na(results)) %>%
+  mutate(t_results = results > 0) %>%
+  group_by(group) %>%
+  summarise(rate = 1 - (sum(t_results) / n()))
+```
+
