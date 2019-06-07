@@ -19,6 +19,8 @@ output:
 library(tidyverse)
 library(here)
 library(lubridate)
+library(boot)
+library(broom)
 theme_set(theme_bw())
 
 options(readr.num_columns = 0)
@@ -65,31 +67,24 @@ return(abs(diff(pull(
           group_by(group) %>%
           summarise(clickt_rate = sum(c_clicks) / n())))))
 }
-
-#bootstrap <- function(df) {
-#  df <- df %>%
-#    group_by(session_id,group) %>%
-#    summarise(c_clicks = any(num_clicks > 0)) %>%
-#    group_by(group) %>%
-#    select(group, c_clicks)
-#  boot_df <- sample_n(df,
-#                      size = NROW(df),
-#                      replace = TRUE)
-#  
-#  diferenc <- boot_df %>%
-#    group_by(group) %>%
-#    summarise(click_rate = sum(c_clicks) / n())
-#  
-#  diferenc <- abs(diff(pull(diferenc))) 
-
-#  return(diferenc)
-#}
 ```
 
 ```{r}
 
 theta_c = theta_ct(buscas, 1:NROW(buscas))
 
+```
+
+
+```{r}
+
+ci_ct = buscas %>%
+    boot(statistic = theta_ct, R = 2000) %>%
+    tidy(conf.level = .95,
+         conf.method = "bca",
+         conf.int = TRUE)
+
+ci_ct
 ```
 
 
@@ -101,5 +96,30 @@ buscas %>%
   mutate(t_results = results > 0) %>%
   group_by(group) %>%
   summarise(rate = 1 - (sum(t_results) / n()))
+```
+
+```{r}
+theta_b0 <- function(df, i) {
+    return(diff(pull(df %>%
+        slice(i) %>%
+        filter(!is.na(results)) %>%
+        mutate(t_results = results > 0) %>%
+        group_by(group) %>%
+        summarise(rate = 1 - (sum(t_results) / n())))))
+}
+```
+
+```{r}
+theta_cb = theta_b0(buscas, 1:NROW(buscas))
+```
+
+```{r}
+ci_b0 = buscas %>%
+    boot(statistic = theta_b0, R = 2000) %>%
+    tidy(conf.level = .95,
+         conf.method = "bca",
+         conf.int = TRUE)
+
+ci_b0
 ```
 
