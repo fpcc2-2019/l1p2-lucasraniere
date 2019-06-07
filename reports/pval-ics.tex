@@ -1,0 +1,216 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={P-valores x ICs},
+            pdfauthor={Lucas Raniere Juvino Santos},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{P-valores x ICs}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Lucas Raniere Juvino Santos}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{o-problema}{%
+\subsection{O Problema}\label{o-problema}}
+
+Considerando que os dados da wikimedia que usamos no Laboratório 2, faça
+uma inferência sobre como é, na população de todas as sessões do site:
+
+\begin{verbatim}
+1. A diferença entre o clickthrough rate dos grupos A e B; e
+2. A diferença na proporção buscas com zero resultados nos grupos A e B
+\end{verbatim}
+
+\hypertarget{o-que-precisa-ser-feito}{%
+\subsection{O que precisa ser feito}\label{o-que-precisa-ser-feito}}
+
+Você deve produzir, para os pontos 1 e 2 acima:
+
+\begin{verbatim}
+a. Um parágrafo de resposta contendo os números necessários e explicando a sua resposta usando testes de hipótese via pemutação. O parágrafo deve ser estilo o que você colocaria em um artigo - claro, formal e contendo as estatísticas e termos necessários (p-valor, se foram usadas permutações, qual era a estatística do teste, etc.).
+b. Um parágrafo de resposta contendo os números necessários e explicando a sua resposta usando ICs. O parágrafo deve ser estilo o que você colocaria em um artigo - claro, formal e contendo as estatísticas e termos necessários (nível de confiança, limites do IC, etc.).
+c. Um parágrafo que comenta se/como os pontos a e b acima concordam, e que compara os dois parágrafos em termos de informação e utilidade para alguém tomando decisões na wikimedia.
+\end{verbatim}
+
+\hypertarget{os-dados}{%
+\subsection{Os dados}\label{os-dados}}
+
+\begin{verbatim}
+## Observations: 136,234
+## Variables: 9
+## $ session_id              <chr> "0000cbcb67c19c45", "0001382e027b2ea4"...
+## $ search_index            <dbl> 1, 1, 1, 1, 2, 3, 4, 5, 6, 1, 1, 2, 1,...
+## $ session_length          <dbl> 0, 303, 435, 58, 58, 58, 58, 58, 58, 0...
+## $ session_start_timestamp <dbl> 2.016030e+13, 2.016031e+13, 2.016031e+...
+## $ session_start_date      <dttm> 2016-03-03 15:20:45, 2016-03-07 08:49...
+## $ group                   <chr> "b", "b", "b", "a", "a", "a", "a", "a"...
+## $ results                 <dbl> 20, 18, 20, 20, 20, 20, 20, 20, 20, 1,...
+## $ num_clicks              <dbl> 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,...
+## $ first_click             <dbl> NA, 1, 1, NA, NA, NA, NA, NA, NA, NA, ...
+\end{verbatim}
+
+\hypertarget{a-diferenca-entre-o-clickthrough-rate-dos-grupos-a-e-b}{%
+\subsection{A diferença entre o clickthrough rate dos grupos A e
+B:}\label{a-diferenca-entre-o-clickthrough-rate-dos-grupos-a-e-b}}
+
+Calculando a diferença do clickthrough rate de cada grupo (função
+\(\theta\)):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta_ct <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df) \{}
+
+\KeywordTok{return}\NormalTok{(}\KeywordTok{abs}\NormalTok{(}\KeywordTok{diff}\NormalTok{(}\KeywordTok{pull}\NormalTok{(}
+\NormalTok{        df }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{group_by}\NormalTok{(session_id, group) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{c_clicks =} \KeywordTok{any}\NormalTok{(num_clicks }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{group_by}\NormalTok{(group) }\OperatorTok{%>%}
+\StringTok{          }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{clickt_rate =} \KeywordTok{sum}\NormalTok{(c_clicks) }\OperatorTok{/}\StringTok{ }\KeywordTok{n}\NormalTok{())))))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Calculando a diferença da proporção de buscas com zeros resultados de
+cada grupo (\(\theta\)):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{buscas }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(results)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{t_results =}\NormalTok{ results }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(group) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{rate =} \DecValTok{1} \OperatorTok{-}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{(t_results) }\OperatorTok{/}\StringTok{ }\KeywordTok{n}\NormalTok{()))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 2 x 2
+##   group  rate
+##   <chr> <dbl>
+## 1 a     0.184
+## 2 b     0.186
+\end{verbatim}
+
+
+\end{document}

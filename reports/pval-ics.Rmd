@@ -3,14 +3,16 @@ title: "P-valores x ICs"
 author: "Lucas Raniere Juvino Santos"
 output:
   html_document:
-    theme: readable
     df_print: paged
+    theme: readable
     toc: yes
   html_notebook:
     fig_width: 7
     theme: readable
     toc: yes
     toc_float: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE, message=FALSE}
@@ -54,33 +56,49 @@ Calculando a diferença do clickthrough rate de cada grupo (função $\theta$):
 ```{r}
 
 theta_ct <- function(df) {
-    ct_g = df %>%
-        group_by(session_id, group) %>%
-        summarise(c_clicks = any(num_clicks > 0)) %>%
-        ungroup() %>%
-        group_by(group) %>%
-        summarise(clickt_rate = sum(c_clicks) / n())
-    
-    a = drop(
-        ct_g %>%
-            filter(group == 'a') %>%
-            select(clickt_rate)
-    )
-    
-    b = drop(
-       ct_g %>%
-            filter(group == 'b') %>%
-            select(clickt_rate) 
-    )
-    
-    return(a-b)
 
+return(abs(diff(pull(
+        df %>%
+          group_by(session_id, group) %>%
+          summarise(c_clicks = any(num_clicks > 0)) %>%
+          group_by(group) %>%
+          summarise(clickt_rate = sum(c_clicks) / n())))))
+}
+
+bootstrap <- function(df) {
+  df <- df %>%
+    group_by(session_id,group) %>%
+    summarise(c_clicks = any(num_clicks > 0)) %>%
+    group_by(group) %>%
+    select(group, c_clicks)
+  boot_df <- sample_n(df,
+                      size = NROW(df),
+                      replace = TRUE)
+  
+  diferenc <- boot_df %>%
+    group_by(group) %>%
+    summarise(click_rate = sum(c_clicks) / n())
+  
+  diferenc <- abs(diff(pull(diferenc))) 
+
+  return(diferenc)
 }
 ```
 
 ```{r}
-theta_ct(buscas)
+reamostragens = tibble(i = 1:20) %>%
+    mutate(theta_ct_s = map_dbl(i, ~bootstrap(buscas)))
 ```
+
+```{r}
+intervalo <- reamostragens %>%
+    mutate(erro = theta_c_s - theta_c2) %>%
+    summarise(erro_i = quantile(erro, .025),
+              erro_s = quantile(erro, .975)) %>%
+    mutate(valor_i = theta_c2 + erro_i,
+           valor_s = theta_c2 + erro_s)
+```
+
 
 Calculando a diferença da proporção de buscas com zeros resultados de cada grupo ($\theta$):
 
