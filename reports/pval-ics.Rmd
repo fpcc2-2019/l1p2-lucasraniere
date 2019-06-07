@@ -51,27 +51,69 @@ buscas = read_csv(here::here("data/search_data.csv"))
 glimpse(buscas)
 ```
 
+```{r}
+buscas <- buscas %>%
+    group_by(session_id, group) %>%
+    summarise(c_clicks = any(num_clicks > 0))
+
+buscas
+```
+
+
 ## A diferença entre o clickthrough rate dos grupos A e B:
 
 Calculando a diferença do clickthrough rate de cada grupo (função $\theta$):
 
 ```{r}
+## isso ta funcionando
+df_test = buscas %>%
+    group_by(group) %>%
+    summarise(clickt_rate = sum(c_clicks) / n())
+
+df_test = abs(diff(pull(df_test)))
+
+df_test
+
+```
+
+
+```{r}
 
 theta_ct <- function(df, i) {
 
-return(abs(diff(pull(
-        df %>%
-          slice(i) %>% #mudei aqui
-          group_by(session_id, group) %>%
-          summarise(c_clicks = any(num_clicks > 0)) %>%
-          group_by(group) %>%
-          summarise(clickt_rate = sum(c_clicks) / n())))))
+    df %>%
+      slice(i) %>% #mudei aqui
+      #group_by(session_id, group) %>%
+      #summarise(c_clicks = any(num_clicks > 0)) %>%
+      group_by(group) %>%
+      summarise(clickt_rate = sum(c_clicks) / n())
+    
+    dif = abs(diff(pull(df)))
+    
+    return(dif)
+}
+
+theta_mao <- function(df) {
+
+    df %>%
+      #slice(i) %>% #mudei aqui
+      #group_by(session_id, group) %>%
+      #summarise(c_clicks = any(num_clicks > 0)) %>%
+      group_by(group) %>%
+      summarise(clickt_rate = sum(c_clicks) / n())
+    
+    dif = abs(diff(pull(df)))
+    
+    return(dif)
 }
 ```
 
 ```{r}
 
-theta_c = theta_ct(buscas, 1:NROW(buscas))
+#theta_c = theta_ct(buscas, 1:NROW(buscas))
+theta_c = theta_mao(buscas)
+
+theta_c
 
 ```
 
